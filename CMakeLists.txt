@@ -29,7 +29,7 @@ add_executable(thermal_chamber
 
 target_include_directories(thermal_chamber PRIVATE src)
 
-option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     enable_testing()
