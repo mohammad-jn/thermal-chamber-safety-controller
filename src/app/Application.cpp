@@ -1,24 +1,35 @@
 #include "app/Application.hpp"
 
+#include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <thread>
-#include <chrono>
 
 namespace thermal {
 
 int Application::run() {
     logger_.info("Starting Thermal Chamber Safety Controller");
 
-    state_machine_.transition_to(SystemState::SelfTest);
-    logger_.info("Transitioned to SelfTest");
+    if (state_machine_.transition_to(SystemState::SelfTest) == TransitionResult::Success) {
+        logger_.info("Transitioned to SelfTest");
+    } else {
+        logger_.error("Failed to transition to SelfTest");
+        return 1;
+    }
 
-    state_machine_.transition_to(SystemState::Idle);
-    logger_.info("Transitioned to Idle");
+    if (state_machine_.transition_to(SystemState::Idle) == TransitionResult::Success) {
+        logger_.info("Transitioned to Idle");
+    } else {
+        logger_.error("Failed to transition to Idle");
+        return 1;
+    }
 
-    state_machine_.transition_to(SystemState::Preheat);
-    logger_.info("Transitioned to Preheat");
+    if (state_machine_.transition_to(SystemState::Preheat) == TransitionResult::Success) {
+        logger_.info("Transitioned to Preheat");
+    } else {
+        logger_.error("Failed to transition to Preheat");
+        return 1;
+    }
 
     constexpr double dt_seconds = 0.5;
     constexpr int total_ticks = 40;
@@ -33,16 +44,21 @@ int Application::run() {
 }
 
 void Application::step(double dt_seconds, int tick_index) {
-    apply_phase1_control_logic();
+    const auto commands = controller_.compute_commands(
+        state_machine_.current_state(),
+        chamber_model_.chamber_temperature_c()
+    );
 
-    const auto commands = actuator_model_.current_commands();
+    actuator_model_.set_commands(commands);
+
+    const auto applied_commands = actuator_model_.current_commands();
     const auto sensors_before = sensor_simulator_.read(chamber_model_.chamber_temperature_c());
 
     chamber_model_.update(
         dt_seconds,
-        commands.heater_power_pct,
-        commands.cooler_power_pct,
-        commands.fan_on,
+        applied_commands.heater_power_pct,
+        applied_commands.cooler_power_pct,
+        applied_commands.fan_on,
         sensors_before.ambient_temperature_c
     );
 
@@ -67,51 +83,11 @@ void Application::step(double dt_seconds, int tick_index) {
     oss << "Tick=" << tick_index
         << " State=" << to_string(state_machine_.current_state())
         << " TempC=" << std::fixed << std::setprecision(2) << sensors_after.chamber_temperature_c
-        << " Heater=" << commands.heater_power_pct
-        << "% Cooler=" << commands.cooler_power_pct
-        << "% Fan=" << (commands.fan_on ? "ON" : "OFF");
+        << " Heater=" << applied_commands.heater_power_pct
+        << "% Cooler=" << applied_commands.cooler_power_pct
+        << "% Fan=" << (applied_commands.fan_on ? "ON" : "OFF");
 
     logger_.info(oss.str());
-}
-
-void Application::apply_phase1_control_logic() {
-    ActuatorCommands commands {};
-
-    switch (state_machine_.current_state()) {
-        case SystemState::Preheat:
-            commands.heater_power_pct = 85.0;
-            commands.cooler_power_pct = 0.0;
-            commands.fan_on = true;
-            break;
-
-        case SystemState::Stabilizing:
-        case SystemState::Running: {
-            const double current_temp = chamber_model_.chamber_temperature_c();
-            const double setpoint = 75.0;
-
-            if (current_temp < setpoint - 1.0) {
-                commands.heater_power_pct = 35.0;
-                commands.cooler_power_pct = 0.0;
-            } else if (current_temp > setpoint + 1.0) {
-                commands.heater_power_pct = 0.0;
-                commands.cooler_power_pct = 30.0;
-            } else {
-                commands.heater_power_pct = 10.0;
-                commands.cooler_power_pct = 0.0;
-            }
-
-            commands.fan_on = true;
-            break;
-        }
-
-        default:
-            commands.heater_power_pct = 0.0;
-            commands.cooler_power_pct = 0.0;
-            commands.fan_on = false;
-            break;
-    }
-
-    actuator_model_.set_commands(commands);
 }
 
 } // namespace thermal

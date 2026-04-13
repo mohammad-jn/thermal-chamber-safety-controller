@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/ChamberModel.hpp"
+#include "core/Controller.hpp"
 #include "core/StateMachine.hpp"
 #include "diagnostics/ConsoleLogger.hpp"
 #include "io/ActuatorModel.hpp"
@@ -15,10 +16,10 @@ public:
 
 private:
     void step(double dt_seconds, int tick_index);
-    void apply_phase1_control_logic();
 
     StateMachine state_machine_;
     ChamberModel chamber_model_;
+    Controller controller_;
     SensorSimulator sensor_simulator_;
     ActuatorModel actuator_model_;
     ConsoleLogger logger_;
