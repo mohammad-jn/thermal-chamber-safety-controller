@@ -44,6 +44,8 @@ int Application::run() {
 }
 
 void Application::step(double dt_seconds, int tick_index) {
+    inject_scenario_events(tick_index);
+
     const auto sensors_before = sensor_simulator_.read(chamber_model_.chamber_temperature_c());
 
     const auto requested_commands = controller_.compute_commands(
@@ -107,7 +109,10 @@ void Application::step(double dt_seconds, int tick_index) {
         << " TempC=" << std::fixed << std::setprecision(2) << sensors_after.chamber_temperature_c
         << " Heater=" << applied_commands.heater_power_pct
         << "% Cooler=" << applied_commands.cooler_power_pct
-        << "% Fan=" << (applied_commands.fan_on ? "ON" : "OFF");
+        << "% Fan=" << (applied_commands.fan_on ? "ON" : "OFF")
+        << " Door=" << (sensors_after.door_open ? "OPEN" : "CLOSED")
+        << " Power=" << (sensors_after.power_available ? "OK" : "LOST")
+        << " Fresh=" << (sensors_after.sensor_fresh ? "YES" : "NO");
 
     logger_.info(oss.str());
 }
@@ -124,6 +129,23 @@ void Application::log_faults(const FaultList& faults) {
         } else {
             logger_.warn(oss.str());
         }
+    }
+}
+
+void Application::inject_scenario_events(int tick_index) {
+    if (tick_index == 16) {
+        sensor_simulator_.set_door_open(true);
+        logger_.warn("Scenario event: door opened");
+    }
+
+    if (tick_index == 20) {
+        sensor_simulator_.set_door_open(false);
+        logger_.info("Scenario event: door closed");
+    }
+
+    if (tick_index == 28) {
+        sensor_simulator_.set_sensor_fresh(false);
+        logger_.warn("Scenario event: sensor freshness lost");
     }
 }
 

@@ -19,6 +19,7 @@ public:
 private:
     void step(double dt_seconds, int tick_index);
     void log_faults(const FaultList& faults);
+    void inject_scenario_events(int tick_index);
 
     StateMachine state_machine_;
     ChamberModel chamber_model_;
