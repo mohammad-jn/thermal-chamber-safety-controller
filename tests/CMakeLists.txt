@@ -11,8 +11,10 @@ FetchContent_MakeAvailable(googletest)
 add_executable(thermal_chamber_tests
     test_state_machine.cpp
     test_controller.cpp
+    test_safety_manager.cpp
     ../src/core/StateMachine.cpp
     ../src/core/Controller.cpp
+    ../src/core/SafetyManager.cpp
 )
 
 target_include_directories(thermal_chamber_tests PRIVATE ../src)

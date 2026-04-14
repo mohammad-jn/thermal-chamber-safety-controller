@@ -44,15 +44,22 @@ int Application::run() {
 }
 
 void Application::step(double dt_seconds, int tick_index) {
-    const auto commands = controller_.compute_commands(
+    const auto sensors_before = sensor_simulator_.read(chamber_model_.chamber_temperature_c());
+
+    const auto requested_commands = controller_.compute_commands(
         state_machine_.current_state(),
         chamber_model_.chamber_temperature_c()
     );
 
-    actuator_model_.set_commands(commands);
+    const auto safe_commands = safety_manager_.apply_interlocks(
+        state_machine_.current_state(),
+        sensors_before,
+        requested_commands
+    );
+
+    actuator_model_.set_commands(safe_commands);
 
     const auto applied_commands = actuator_model_.current_commands();
-    const auto sensors_before = sensor_simulator_.read(chamber_model_.chamber_temperature_c());
 
     chamber_model_.update(
         dt_seconds,

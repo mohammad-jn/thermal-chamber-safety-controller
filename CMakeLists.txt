@@ -22,6 +22,7 @@ add_executable(thermal_chamber
     src/core/StateMachine.cpp
     src/core/ChamberModel.cpp
     src/core/Controller.cpp
+    src/core/SafetyManager.cpp
     src/io/SensorSimulator.cpp
     src/io/ActuatorModel.cpp
     src/diagnostics/ConsoleLogger.cpp
