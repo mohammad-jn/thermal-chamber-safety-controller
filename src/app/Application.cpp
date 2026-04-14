@@ -58,8 +58,23 @@ void Application::step(double dt_seconds, int tick_index) {
     );
 
     actuator_model_.set_commands(safe_commands);
-
     const auto applied_commands = actuator_model_.current_commands();
+
+    const auto faults_before = fault_manager_.detect_faults(sensors_before, applied_commands);
+    log_faults(faults_before);
+
+    if (fault_manager_.has_critical_fault(faults_before) &&
+        state_machine_.current_state() != SystemState::Fault &&
+        state_machine_.current_state() != SystemState::EmergencyShutdown) {
+        if (state_machine_.transition_to(SystemState::Fault) == TransitionResult::Success) {
+            logger_.error("Transitioned to Fault due to critical fault condition");
+        }
+    } else if (fault_manager_.has_warning_fault(faults_before) &&
+               state_machine_.current_state() == SystemState::Running) {
+        if (state_machine_.transition_to(SystemState::Warning) == TransitionResult::Success) {
+            logger_.warn("Transitioned to Warning due to warning fault condition");
+        }
+    }
 
     chamber_model_.update(
         dt_seconds,
@@ -95,6 +110,21 @@ void Application::step(double dt_seconds, int tick_index) {
         << "% Fan=" << (applied_commands.fan_on ? "ON" : "OFF");
 
     logger_.info(oss.str());
+}
+
+void Application::log_faults(const FaultList& faults) {
+    for (const auto& fault : faults) {
+        std::ostringstream oss;
+        oss << "Fault detected: " << to_string(fault.type)
+            << " Severity=" << to_string(fault.severity)
+            << " Message=" << fault.message;
+
+        if (fault.severity == FaultSeverity::Critical) {
+            logger_.error(oss.str());
+        } else {
+            logger_.warn(oss.str());
+        }
+    }
 }
 
 } // namespace thermal
