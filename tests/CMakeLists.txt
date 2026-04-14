@@ -14,10 +14,14 @@ add_executable(thermal_chamber_tests
     test_controller.cpp
     test_safety_manager.cpp
     test_fault_manager.cpp
+    test_integration_scenarios.cpp
     ../src/core/StateMachine.cpp
     ../src/core/Controller.cpp
     ../src/core/SafetyManager.cpp
     ../src/core/FaultManager.cpp
+    ../src/core/ChamberModel.cpp
+    ../src/io/ActuatorModel.cpp
+    ../src/io/SensorSimulator.cpp
 )
 
 target_include_directories(thermal_chamber_tests PRIVATE ../src)
