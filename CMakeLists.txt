@@ -19,6 +19,7 @@ endif()
 add_executable(thermal_chamber
     src/main.cpp
     src/app/Application.cpp
+    src/config/ConfigManager.cpp
     src/core/StateMachine.cpp
     src/core/ChamberModel.cpp
     src/core/Controller.cpp

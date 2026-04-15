@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/ConfigManager.hpp"
 #include "core/ChamberModel.hpp"
 #include "core/Controller.hpp"
 #include "core/FaultManager.hpp"
@@ -13,7 +14,7 @@ namespace thermal {
 
 class Application {
 public:
-    Application() = default;
+    Application();
     int run();
 
 private:
@@ -21,6 +22,7 @@ private:
     void log_faults(const FaultList& faults);
     void inject_scenario_events(int tick_index);
 
+    ConfigManager config_manager_;
     StateMachine state_machine_;
     ChamberModel chamber_model_;
     Controller controller_;

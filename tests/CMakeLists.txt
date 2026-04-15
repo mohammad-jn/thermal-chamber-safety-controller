@@ -15,6 +15,8 @@ add_executable(thermal_chamber_tests
     test_safety_manager.cpp
     test_fault_manager.cpp
     test_integration_scenarios.cpp
+    test_config_manager.cpp
+    ../src/config/ConfigManager.cpp
     ../src/core/StateMachine.cpp
     ../src/core/Controller.cpp
     ../src/core/SafetyManager.cpp

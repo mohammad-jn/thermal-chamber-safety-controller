@@ -6,7 +6,8 @@
 using namespace thermal;
 
 TEST(ControllerTest, PreheatUsesStrongHeatingAndFan) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Preheat, 30.0);
 
@@ -16,7 +17,8 @@ TEST(ControllerTest, PreheatUsesStrongHeatingAndFan) {
 }
 
 TEST(ControllerTest, StabilizingHeatsWhenBelowSetpointBand) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Stabilizing, 70.0);
 
@@ -26,7 +28,8 @@ TEST(ControllerTest, StabilizingHeatsWhenBelowSetpointBand) {
 }
 
 TEST(ControllerTest, RunningUsesLowHeatNearSetpoint) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Running, 75.0);
 
@@ -36,7 +39,8 @@ TEST(ControllerTest, RunningUsesLowHeatNearSetpoint) {
 }
 
 TEST(ControllerTest, RunningUsesCoolingAboveSetpointBand) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Running, 77.0);
 
@@ -46,7 +50,8 @@ TEST(ControllerTest, RunningUsesCoolingAboveSetpointBand) {
 }
 
 TEST(ControllerTest, IdleTurnsOutputsOff) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Idle, 25.0);
 
@@ -56,7 +61,8 @@ TEST(ControllerTest, IdleTurnsOutputsOff) {
 }
 
 TEST(ControllerTest, FaultTurnsOutputsOff) {
-    Controller controller;
+    SimulationConfig config;
+    Controller controller(config);
 
     const auto commands = controller.compute_commands(SystemState::Fault, 90.0);
 

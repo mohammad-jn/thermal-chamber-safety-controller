@@ -1,3 +1,4 @@
+#include "config/ConfigManager.hpp"
 #include "core/ChamberModel.hpp"
 #include "core/Controller.hpp"
 #include "core/FaultManager.hpp"
@@ -21,8 +22,11 @@ void run_single_step(
     FaultManager& fault_manager,
     SensorSimulator& sensor_simulator,
     ActuatorModel& actuator_model,
-    double dt_seconds
+    double dt_seconds,
+    const SimulationConfig& config
 ) {
+    sensor_simulator.set_ambient_temperature_c(config.ambient_temperature_c);
+
     const auto sensors_before = sensor_simulator.read(chamber_model.chamber_temperature_c());
 
     const auto requested_commands = controller.compute_commands(
@@ -61,13 +65,13 @@ void run_single_step(
     const auto sensors_after = sensor_simulator.read(chamber_model.chamber_temperature_c());
 
     if (state_machine.current_state() == SystemState::Preheat &&
-        sensors_after.chamber_temperature_c >= 68.0) {
+        sensors_after.chamber_temperature_c >= config.stabilization_entry_temperature_c) {
         state_machine.transition_to(SystemState::Stabilizing);
     }
 
     if (state_machine.current_state() == SystemState::Stabilizing &&
-        sensors_after.chamber_temperature_c >= 70.0 &&
-        sensors_after.chamber_temperature_c <= 76.0) {
+        sensors_after.chamber_temperature_c >= config.running_min_temperature_c &&
+        sensors_after.chamber_temperature_c <= config.running_max_temperature_c) {
         state_machine.transition_to(SystemState::Running);
     }
 }
@@ -75,15 +79,16 @@ void run_single_step(
 } // namespace
 
 TEST(IntegrationScenarioTest, NormalStartupReachesRunning) {
+    ConfigManager config_manager;
+    const auto& config = config_manager.config();
+
     StateMachine state_machine;
     ChamberModel chamber_model;
-    Controller controller;
+    Controller controller(config);
     SafetyManager safety_manager;
     FaultManager fault_manager;
     SensorSimulator sensor_simulator;
     ActuatorModel actuator_model;
-
-    constexpr double dt_seconds = 0.5;
 
     ASSERT_EQ(state_machine.transition_to(SystemState::SelfTest), TransitionResult::Success);
     ASSERT_EQ(state_machine.transition_to(SystemState::Idle), TransitionResult::Success);
@@ -98,7 +103,8 @@ TEST(IntegrationScenarioTest, NormalStartupReachesRunning) {
             fault_manager,
             sensor_simulator,
             actuator_model,
-            dt_seconds
+            config.dt_seconds,
+            config
         );
 
         if (state_machine.current_state() == SystemState::Running) {
@@ -110,15 +116,16 @@ TEST(IntegrationScenarioTest, NormalStartupReachesRunning) {
 }
 
 TEST(IntegrationScenarioTest, DoorOpenBlocksHeater) {
+    ConfigManager config_manager;
+    const auto& config = config_manager.config();
+
     StateMachine state_machine;
     ChamberModel chamber_model;
-    Controller controller;
+    Controller controller(config);
     SafetyManager safety_manager;
     FaultManager fault_manager;
     SensorSimulator sensor_simulator;
     ActuatorModel actuator_model;
-
-    constexpr double dt_seconds = 0.5;
 
     ASSERT_EQ(state_machine.transition_to(SystemState::SelfTest), TransitionResult::Success);
     ASSERT_EQ(state_machine.transition_to(SystemState::Idle), TransitionResult::Success);
@@ -134,7 +141,8 @@ TEST(IntegrationScenarioTest, DoorOpenBlocksHeater) {
         fault_manager,
         sensor_simulator,
         actuator_model,
-        dt_seconds
+        config.dt_seconds,
+        config
     );
 
     const auto applied = actuator_model.current_commands();
@@ -143,15 +151,16 @@ TEST(IntegrationScenarioTest, DoorOpenBlocksHeater) {
 }
 
 TEST(IntegrationScenarioTest, SensorStaleTransitionsSystemToFault) {
+    ConfigManager config_manager;
+    const auto& config = config_manager.config();
+
     StateMachine state_machine;
     ChamberModel chamber_model;
-    Controller controller;
+    Controller controller(config);
     SafetyManager safety_manager;
     FaultManager fault_manager;
     SensorSimulator sensor_simulator;
     ActuatorModel actuator_model;
-
-    constexpr double dt_seconds = 0.5;
 
     ASSERT_EQ(state_machine.transition_to(SystemState::SelfTest), TransitionResult::Success);
     ASSERT_EQ(state_machine.transition_to(SystemState::Idle), TransitionResult::Success);
@@ -167,7 +176,8 @@ TEST(IntegrationScenarioTest, SensorStaleTransitionsSystemToFault) {
         fault_manager,
         sensor_simulator,
         actuator_model,
-        dt_seconds
+        config.dt_seconds,
+        config
     );
 
     EXPECT_EQ(state_machine.current_state(), SystemState::Fault);

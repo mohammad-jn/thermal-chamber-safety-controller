@@ -41,6 +41,27 @@ struct FaultRecord {
     std::string message;
 };
 
+struct SimulationConfig {
+    double target_temperature_c {75.0};
+    double stabilization_entry_temperature_c {68.0};
+    double running_min_temperature_c {70.0};
+    double running_max_temperature_c {76.0};
+
+    double overtemperature_warning_c {85.0};
+    double overtemperature_critical_c {95.0};
+
+    double preheat_heater_power_pct {85.0};
+    double control_heater_high_pct {55.0};
+    double control_heater_low_pct {10.0};
+    double control_cooler_pct {30.0};
+
+    double control_band_c {1.0};
+
+    double ambient_temperature_c {22.0};
+    double dt_seconds {0.5};
+    int total_ticks {40};
+};
+
 inline std::string to_string(SystemState state) {
     switch (state) {
         case SystemState::Startup: return "Startup";
