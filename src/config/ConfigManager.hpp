@@ -13,6 +13,11 @@ public:
     [[nodiscard]] const SimulationConfig& config() const noexcept;
     [[nodiscard]] bool validate(std::string& error_message) const noexcept;
 
+    [[nodiscard]] bool load_from_file(
+        const std::string& file_path,
+        std::string& error_message
+    ) noexcept;
+
 private:
     SimulationConfig config_;
 };

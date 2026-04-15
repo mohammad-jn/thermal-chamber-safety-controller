@@ -20,8 +20,8 @@ Application::Application()
 
 int Application::run() {
     std::string config_error;
-    if (!config_manager_.validate(config_error)) {
-        logger_.error("Invalid configuration: " + config_error);
+    if (!config_manager_.load_from_file("config/default_config.json", config_error)) {
+        logger_.error("Failed to load configuration: " + config_error);
         return 1;
     }
 

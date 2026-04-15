@@ -1,11 +1,92 @@
 #include "config/ConfigManager.hpp"
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 namespace thermal {
+
+namespace {
+using json = nlohmann::json;
+}
 
 ConfigManager::ConfigManager() = default;
 
 const SimulationConfig& ConfigManager::config() const noexcept {
     return config_;
+}
+
+bool ConfigManager::load_from_file(
+    const std::string& file_path,
+    std::string& error_message
+) noexcept {
+    std::ifstream input(file_path);
+    if (!input.is_open()) {
+        error_message = "Could not open config file: " + file_path;
+        return false;
+    }
+
+    json j;
+    try {
+        input >> j;
+    } catch (const std::exception& ex) {
+        error_message = "Failed to parse JSON config: " + std::string(ex.what());
+        return false;
+    }
+
+    try {
+        if (j.contains("target_temperature_c")) {
+            config_.target_temperature_c = j.at("target_temperature_c").get<double>();
+        }
+        if (j.contains("stabilization_entry_temperature_c")) {
+            config_.stabilization_entry_temperature_c = j.at("stabilization_entry_temperature_c").get<double>();
+        }
+        if (j.contains("running_min_temperature_c")) {
+            config_.running_min_temperature_c = j.at("running_min_temperature_c").get<double>();
+        }
+        if (j.contains("running_max_temperature_c")) {
+            config_.running_max_temperature_c = j.at("running_max_temperature_c").get<double>();
+        }
+        if (j.contains("overtemperature_warning_c")) {
+            config_.overtemperature_warning_c = j.at("overtemperature_warning_c").get<double>();
+        }
+        if (j.contains("overtemperature_critical_c")) {
+            config_.overtemperature_critical_c = j.at("overtemperature_critical_c").get<double>();
+        }
+        if (j.contains("preheat_heater_power_pct")) {
+            config_.preheat_heater_power_pct = j.at("preheat_heater_power_pct").get<double>();
+        }
+        if (j.contains("control_heater_high_pct")) {
+            config_.control_heater_high_pct = j.at("control_heater_high_pct").get<double>();
+        }
+        if (j.contains("control_heater_low_pct")) {
+            config_.control_heater_low_pct = j.at("control_heater_low_pct").get<double>();
+        }
+        if (j.contains("control_cooler_pct")) {
+            config_.control_cooler_pct = j.at("control_cooler_pct").get<double>();
+        }
+        if (j.contains("control_band_c")) {
+            config_.control_band_c = j.at("control_band_c").get<double>();
+        }
+        if (j.contains("ambient_temperature_c")) {
+            config_.ambient_temperature_c = j.at("ambient_temperature_c").get<double>();
+        }
+        if (j.contains("dt_seconds")) {
+            config_.dt_seconds = j.at("dt_seconds").get<double>();
+        }
+        if (j.contains("total_ticks")) {
+            config_.total_ticks = j.at("total_ticks").get<int>();
+        }
+    } catch (const std::exception& ex) {
+        error_message = "Invalid config field type: " + std::string(ex.what());
+        return false;
+    }
+
+    if (!validate(error_message)) {
+        return false;
+    }
+
+    error_message.clear();
+    return true;
 }
 
 bool ConfigManager::validate(std::string& error_message) const noexcept {
