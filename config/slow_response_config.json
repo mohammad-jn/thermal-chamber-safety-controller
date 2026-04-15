@@ -1,0 +1,16 @@
+{
+  "target_temperature_c": 75.0,
+  "stabilization_entry_temperature_c": 68.0,
+  "running_min_temperature_c": 70.0,
+  "running_max_temperature_c": 76.0,
+  "overtemperature_warning_c": 85.0,
+  "overtemperature_critical_c": 95.0,
+  "preheat_heater_power_pct": 70.0,
+  "control_heater_high_pct": 40.0,
+  "control_heater_low_pct": 8.0,
+  "control_cooler_pct": 20.0,
+  "control_band_c": 1.0,
+  "ambient_temperature_c": 22.0,
+  "dt_seconds": 0.5,
+  "total_ticks": 50
+}

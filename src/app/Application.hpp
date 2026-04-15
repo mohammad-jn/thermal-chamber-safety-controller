@@ -10,12 +10,14 @@
 #include "io/ActuatorModel.hpp"
 #include "io/SensorSimulator.hpp"
 
+#include <string>
+
 namespace thermal {
 
 class Application {
 public:
     Application();
-    int run();
+    int run(const std::string& config_path);
 
 private:
     void step(double dt_seconds, int tick_index);

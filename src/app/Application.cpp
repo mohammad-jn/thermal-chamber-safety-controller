@@ -18,9 +18,9 @@ Application::Application()
       actuator_model_(),
       logger_() {}
 
-int Application::run() {
+int Application::run(const std::string& config_path) {
     std::string config_error;
-    if (!config_manager_.load_from_file("config/default_config.json", config_error)) {
+    if (!config_manager_.load_from_file(config_path, config_error)) {
         logger_.error("Failed to load configuration: " + config_error);
         return 1;
     }
@@ -28,6 +28,7 @@ int Application::run() {
     sensor_simulator_.set_ambient_temperature_c(config_manager_.config().ambient_temperature_c);
 
     logger_.info("Starting Thermal Chamber Safety Controller");
+    logger_.info("Using config file: " + config_path);
 
     if (state_machine_.transition_to(SystemState::SelfTest) == TransitionResult::Success) {
         logger_.info("Transitioned to SelfTest");
