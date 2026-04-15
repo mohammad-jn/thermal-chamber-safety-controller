@@ -18,6 +18,8 @@ public:
         std::string& error_message
     ) noexcept;
 
+    void set_config_for_testing(const SimulationConfig& config) noexcept;
+
 private:
     SimulationConfig config_;
 };

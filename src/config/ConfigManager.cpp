@@ -149,4 +149,8 @@ bool ConfigManager::validate(std::string& error_message) const noexcept {
     return true;
 }
 
+void ConfigManager::set_config_for_testing(const SimulationConfig& config) noexcept {
+    config_ = config;
+}
+
 } // namespace thermal
