@@ -18,7 +18,7 @@ namespace thermal {
 class Application {
 public:
     Application();
-    int run(const std::string& config_path);
+    int run(const std::string& config_path, const std::string& scenario_path);
 
 private:
     void step(double dt_seconds, int tick_index);

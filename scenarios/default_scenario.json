@@ -1,0 +1,7 @@
+{
+  "events": [
+    { "tick_index": 16, "type": "OpenDoor" },
+    { "tick_index": 20, "type": "CloseDoor" },
+    { "tick_index": 28, "type": "SetSensorFreshFalse" }
+  ]
+}

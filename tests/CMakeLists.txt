@@ -36,10 +36,6 @@ add_executable(thermal_chamber_tests
 
 target_include_directories(thermal_chamber_tests PRIVATE ../src)
 
-target_compile_definitions(thermal_chamber_tests PRIVATE
-    TEST_CONFIG_DIR="${CMAKE_SOURCE_DIR}/config"
-)
-
 target_link_libraries(thermal_chamber_tests
     GTest::gtest_main
     nlohmann_json::nlohmann_json
@@ -49,3 +45,4 @@ include(GoogleTest)
 gtest_discover_tests(thermal_chamber_tests)
 
 file(COPY ${CMAKE_SOURCE_DIR}/config DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/scenarios DESTINATION ${CMAKE_BINARY_DIR})
