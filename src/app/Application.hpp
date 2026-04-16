@@ -9,6 +9,7 @@
 #include "diagnostics/ConsoleLogger.hpp"
 #include "io/ActuatorModel.hpp"
 #include "io/SensorSimulator.hpp"
+#include "scenarios/ScenarioRunner.hpp"
 
 #include <string>
 
@@ -22,7 +23,6 @@ public:
 private:
     void step(double dt_seconds, int tick_index);
     void log_faults(const FaultList& faults);
-    void inject_scenario_events(int tick_index);
 
     ConfigManager config_manager_;
     StateMachine state_machine_;
@@ -32,6 +32,7 @@ private:
     SafetyManager safety_manager_;
     SensorSimulator sensor_simulator_;
     ActuatorModel actuator_model_;
+    ScenarioRunner scenario_runner_;
     ConsoleLogger logger_;
 };
 

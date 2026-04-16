@@ -16,6 +16,7 @@ Application::Application()
       safety_manager_(),
       sensor_simulator_(),
       actuator_model_(),
+      scenario_runner_(),
       logger_() {}
 
 int Application::run(const std::string& config_path) {
@@ -64,7 +65,7 @@ int Application::run(const std::string& config_path) {
 }
 
 void Application::step(double dt_seconds, int tick_index) {
-    inject_scenario_events(tick_index);
+    scenario_runner_.apply_events_for_tick(tick_index, sensor_simulator_);
 
     const auto sensors_before = sensor_simulator_.read(chamber_model_.chamber_temperature_c());
 
@@ -150,23 +151,6 @@ void Application::log_faults(const FaultList& faults) {
         } else {
             logger_.warn(oss.str());
         }
-    }
-}
-
-void Application::inject_scenario_events(int tick_index) {
-    if (tick_index == 16) {
-        sensor_simulator_.set_door_open(true);
-        logger_.warn("Scenario event: door opened");
-    }
-
-    if (tick_index == 20) {
-        sensor_simulator_.set_door_open(false);
-        logger_.info("Scenario event: door closed");
-    }
-
-    if (tick_index == 28) {
-        sensor_simulator_.set_sensor_fresh(false);
-        logger_.warn("Scenario event: sensor freshness lost");
     }
 }
 

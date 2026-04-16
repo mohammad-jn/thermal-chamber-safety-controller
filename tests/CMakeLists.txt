@@ -22,6 +22,7 @@ add_executable(thermal_chamber_tests
     test_fault_manager.cpp
     test_integration_scenarios.cpp
     test_config_manager.cpp
+    test_scenario_runner.cpp
     ../src/config/ConfigManager.cpp
     ../src/core/StateMachine.cpp
     ../src/core/Controller.cpp
@@ -30,6 +31,7 @@ add_executable(thermal_chamber_tests
     ../src/core/ChamberModel.cpp
     ../src/io/ActuatorModel.cpp
     ../src/io/SensorSimulator.cpp
+    ../src/scenarios/ScenarioRunner.cpp
 )
 
 target_include_directories(thermal_chamber_tests PRIVATE ../src)
